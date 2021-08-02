@@ -42,10 +42,70 @@ _
             tags => ['category:filtering'],
         },
 
-        # TODO: comment_contains, comment_not_contains, comment_matches
-        # TODO: address_contains, address_not_contains, address_matches
-        # TODO: user_contains, user_not_contains, user_matches
-        # TODO: name_contains, name_not_contains, name_matches
+        comment_contains => {
+            schema => 'str*',
+            tags => ['category:email-criteria'],
+        },
+        comment_not_contains => {
+            schema => 'str*',
+            tags => ['category:email-criteria'],
+        },
+        comment_matches => {
+            schema => 're*',
+            tags => ['category:email-criteria'],
+        },
+
+        address_contains => {
+            schema => 'str*',
+            tags => ['category:email-criteria'],
+        },
+        address_not_contains => {
+            schema => 'str*',
+            tags => ['category:email-criteria'],
+        },
+        address_matches => {
+            schema => 're*',
+            tags => ['category:email-criteria'],
+        },
+
+        host_contains => {
+            schema => 'str*',
+            tags => ['category:email-criteria'],
+        },
+        host_not_contains => {
+            schema => 'str*',
+            tags => ['category:email-criteria'],
+        },
+        host_matches => {
+            schema => 're*',
+            tags => ['category:email-criteria'],
+        },
+
+        user_contains => {
+            schema => 'str*',
+            tags => ['category:email-criteria'],
+        },
+        user_not_contains => {
+            schema => 'str*',
+            tags => ['category:email-criteria'],
+        },
+        user_matches => {
+            schema => 're*',
+            tags => ['category:email-criteria'],
+        },
+
+        name_contains => {
+            schema => 'str*',
+            tags => ['category:email-criteria'],
+        },
+        name_not_contains => {
+            schema => 'str*',
+            tags => ['category:email-criteria'],
+        },
+        name_matches => {
+            schema => 're*',
+            tags => ['category:email-criteria'],
+        },
 
         files => {
             'x.name.is_plural' => 1,
@@ -120,7 +180,7 @@ _
         require Regexp::Pattern::Email;
         require Email::Address;
 
-        my $re = qr/\b$Regexp::Pattern::Email::Address::RE{email_address}{pat}\b/;
+        my $re = qr/(?:\b|\A)$Regexp::Pattern::Email::RE{email_address}{pat}(?:\b|\z)/;
 
         $args{_highlight_regexp} = $re;
         $args{_filter_code} = sub {
@@ -141,27 +201,53 @@ _
           URL:
             for my $email (@email_objs) {
 
-                # scheme criteria
-                if (defined $fargs->{scheme_contains}) {
+                # comment criteria
+                if (defined $fargs->{comment_contains}) {
                     if ($fargs->{ignore_case} ?
-                         index(lc($url->scheme), lc($fargs->{scheme_contains})) >= 0 :
-                         index($url->scheme    , $fargs->{scheme_contains})     >= 0) {
+                         index(lc($email->comment), lc($fargs->{comment_contains})) >= 0 :
+                         index($email->comment    , $fargs->{comment_contains})     >= 0) {
                     } else {
                         next;
                     }
                 }
-                if (defined $fargs->{scheme_not_contains}) {
+                if (defined $fargs->{comment_not_contains}) {
                     if ($fargs->{ignore_case} ?
-                         index(lc($url->scheme), lc($fargs->{scheme_not_contains})) < 0 :
-                         index($url->scheme    , $fargs->{scheme_not_contains})     < 0) {
+                         index(lc($email->comment), lc($fargs->{comment_not_contains})) < 0 :
+                         index($email->comment    , $fargs->{comment_not_contains})     < 0) {
                     } else {
                         next;
                     }
                 }
-                if (defined $fargs->{scheme_matches}) {
+                if (defined $fargs->{comment_matches}) {
                     if ($fargs->{ignore_case} ?
-                            $url->scheme =~ qr/$fargs->{scheme_matches}/i :
-                            $url->scheme =~ qr/$fargs->{scheme_matches}/) {
+                            $email->comment =~ qr/$fargs->{comment_matches}/i :
+                            $email->comment =~ qr/$fargs->{comment_matches}/) {
+                    } else {
+                        next;
+                    }
+                }
+
+                # address criteria
+                if (defined $fargs->{address_contains}) {
+                    if ($fargs->{ignore_case} ?
+                         index(lc($email->address), lc($fargs->{address_contains})) >= 0 :
+                         index($email->address    , $fargs->{address_contains})     >= 0) {
+                    } else {
+                        next;
+                    }
+                }
+                if (defined $fargs->{address_not_contains}) {
+                    if ($fargs->{ignore_case} ?
+                         index(lc($email->address), lc($fargs->{address_not_contains})) < 0 :
+                         index($email->address    , $fargs->{address_not_contains})     < 0) {
+                    } else {
+                        next;
+                    }
+                }
+                if (defined $fargs->{address_matches}) {
+                    if ($fargs->{ignore_case} ?
+                            $email->address =~ qr/$fargs->{address_matches}/i :
+                            $email->address =~ qr/$fargs->{address_matches}/) {
                     } else {
                         next;
                     }
@@ -170,84 +256,78 @@ _
                 # host criteria
                 if (defined $fargs->{host_contains}) {
                     if ($fargs->{ignore_case} ?
-                         index(lc($url->host), lc($fargs->{host_contains})) >= 0 :
-                         index($url->host    , $fargs->{host_contains})     >= 0) {
+                         index(lc($email->host), lc($fargs->{host_contains})) >= 0 :
+                         index($email->host    , $fargs->{host_contains})     >= 0) {
                     } else {
                         next;
                     }
                 }
                 if (defined $fargs->{host_not_contains}) {
                     if ($fargs->{ignore_case} ?
-                         index(lc($url->host), lc($fargs->{host_not_contains})) < 0 :
-                         index($url->host    , $fargs->{host_not_contains})     < 0) {
+                         index(lc($email->host), lc($fargs->{host_not_contains})) < 0 :
+                         index($email->host    , $fargs->{host_not_contains})     < 0) {
                     } else {
                         next;
                     }
                 }
                 if (defined $fargs->{host_matches}) {
                     if ($fargs->{ignore_case} ?
-                            $url->host =~ qr/$fargs->{host_matches}/i :
-                            $url->host =~ qr/$fargs->{host_matches}/) {
+                            $email->host =~ qr/$fargs->{host_matches}/i :
+                            $email->host =~ qr/$fargs->{host_matches}/) {
                     } else {
                         next;
                     }
                 }
 
-                # path criteria
-                if (defined $fargs->{path_contains}) {
+                # user criteria
+                if (defined $fargs->{user_contains}) {
                     if ($fargs->{ignore_case} ?
-                         index(lc($url->path), lc($fargs->{path_contains})) >= 0 :
-                         index($url->path    , $fargs->{path_contains})     >= 0) {
+                         index(lc($email->user), lc($fargs->{user_contains})) >= 0 :
+                         index($email->user    , $fargs->{user_contains})     >= 0) {
                     } else {
                         next;
                     }
                 }
-                if (defined $fargs->{path_not_contains}) {
+                if (defined $fargs->{user_not_contains}) {
                     if ($fargs->{ignore_case} ?
-                         index(lc($url->path), lc($fargs->{path_not_contains})) < 0 :
-                         index($url->path    , $fargs->{path_not_contains})     < 0) {
+                         index(lc($email->user), lc($fargs->{user_not_contains})) < 0 :
+                         index($email->user    , $fargs->{user_not_contains})     < 0) {
                     } else {
                         next;
                     }
                 }
-                if (defined $fargs->{path_matches}) {
+                if (defined $fargs->{user_matches}) {
                     if ($fargs->{ignore_case} ?
-                            $url->path =~ qr/$fargs->{path_matches}/i :
-                            $url->path =~ qr/$fargs->{path_matches}/) {
+                            $email->user =~ qr/$fargs->{user_matches}/i :
+                            $email->user =~ qr/$fargs->{user_matches}/) {
                     } else {
                         next;
                     }
                 }
 
-                # query param criteria
-                if (defined $fargs->{query_param_contains}) {
-                    for my $param (keys %{ $fargs->{query_param_contains} }) {
-                        if ($fargs->{ignore_case} ?
-                                index((lc($url->query_param($param)) // ''), lc($fargs->{query_param_contains}{$param})) >= 0 :
-                                index(($url->query_param($param)  // '')   , $fargs->{query_param_contains}{$param})     >= 0) {
-                        } else {
-                            next URL;
-                        }
+                # name criteria
+                if (defined $fargs->{name_contains}) {
+                    if ($fargs->{ignore_case} ?
+                         index(lc($email->name), lc($fargs->{name_contains})) >= 0 :
+                         index($email->name    , $fargs->{name_contains})     >= 0) {
+                    } else {
+                        next;
                     }
                 }
-                if (defined $fargs->{query_param_not_contains}) {
-                    for my $param (keys %{ $fargs->{query_param_not_contains} }) {
-                        if ($fargs->{ignore_case} ?
-                                index((lc($url->query_param($param)) // ''), lc($fargs->{query_param_not_contains}{$param})) < 0 :
-                                index(($url->query_param($param) // '')    , $fargs->{query_param_not_contains}{$param})     < 0) {
-                        } else {
-                            next URL;
-                        }
+                if (defined $fargs->{name_not_contains}) {
+                    if ($fargs->{ignore_case} ?
+                         index(lc($email->name), lc($fargs->{name_not_contains})) < 0 :
+                         index($email->name    , $fargs->{name_not_contains})     < 0) {
+                    } else {
+                        next;
                     }
                 }
-                if (defined $fargs->{query_param_matches}) {
-                    for my $param (keys %{ $fargs->{query_param_matches} }) {
-                        if ($fargs->{ignore_case} ?
-                                ($url->query_param($param) // '') =~ qr/$fargs->{query_param_matches}{$param}/i :
-                                ($url->query_param($param) // '') =~ qr/$fargs->{query_param_matches}{$param}/) {
-                        } else {
-                            next URL;
-                        }
+                if (defined $fargs->{name_matches}) {
+                    if ($fargs->{ignore_case} ?
+                            $email->name =~ qr/$fargs->{name_matches}/i :
+                            $email->name =~ qr/$fargs->{name_matches}/) {
+                    } else {
+                        next;
                     }
                 }
 
